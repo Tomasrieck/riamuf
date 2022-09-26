@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "center",
     borderTopColor: "rgb(0,0,0)",
     borderTopWidth: 1,
   },

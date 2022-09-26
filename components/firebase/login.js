@@ -11,17 +11,28 @@ import { firebase } from "./config";
 
 import { AntDesign } from "@expo/vector-icons";
 
+export var userRoom = "";
+
 export const Login = (props) => {
-  const [email, setEmail] = useState(null);
-  const [password, setPassword] = useState(null);
+  const [email, setEmail] = useState("tomasrieck@gmail.com");
+  const [password, setPassword] = useState("Jesorm99");
 
   function logIn() {
     firebase
       .auth()
       .signInWithEmailAndPassword(email, password)
       .then(() => {
-        props.navigation.navigate("Home");
-        console.log("Logget ind");
+        firebase
+          .firestore()
+          .collection("Users")
+          .doc(firebase.auth().currentUser.uid)
+          .get()
+          .then((documentSnapshot) => {
+            userRoom = documentSnapshot.data().Room;
+            props.navigation.navigate("Home");
+            console.log("Øvelokale:", { userRoom });
+          });
+        console.log(firebase.auth().currentUser.uid, "er logget ind");
       })
       .catch((error) => {
         if (error.code === "auth/invalid-email") {

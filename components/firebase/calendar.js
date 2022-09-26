@@ -4,80 +4,65 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { firebase } from "./config";
+import { userRoom } from "./login";
+import {
+  days,
+  months,
+  row1,
+  row2,
+  row3,
+  row4,
+  row5,
+  row6,
+  row7,
+  row8,
+} from "../calendarUtils";
 
 import { AntDesign } from "@expo/vector-icons";
 
 export const Calendar = () => {
-  const hoursRef = firebase.firestore().collection("Øvelokale 3");
+  const currentUserRoom = userRoom;
   const usersRef = firebase.firestore().collection("Users");
+  const hoursRef = firebase.firestore().collection(currentUserRoom);
   const [hours, setHours] = useState([]);
   const user = [];
   const [chosenUserId, setChosenUserId] = useState([]);
-  const [chosenUserName, setChosenUserName] = useState(null);
   const [chosenBookedHours, setChosenBookedHours] = useState(null);
   const chosenHour = [];
+  var availHours = [];
+  var bookedHours = [];
+  const [startHour, setStartHour] = useState();
   const [date] = useState(new Date());
   const [toggleUpdate, setToggleUpdate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userLoading, setUserLoading] = useState(true);
-  const [popUpVisible, setPopUpVisible] = useState(false);
-
-  const days = [
-    "Søndag",
-    "Mandag",
-    "Tirsdag",
-    "Onsdag",
-    "Torsdag",
-    "Fredag",
-    "Lørdag",
-  ];
-  const months = [
-    "Januar",
-    "Februar",
-    "Marts",
-    "April",
-    "Maj",
-    "Juni",
-    "Juli",
-    "August",
-    "September",
-    "Oktober",
-    "November",
-    "December",
-  ];
-
-  const row1 = ["07:00", "07:30", "08:00", "08:30"];
-  const row2 = ["09:00", "09:30", "10:00", "10:30"];
-  const row3 = ["11:00", "11:30", "12:00", "12:30"];
-  const row4 = ["13:00", "13:30", "14:00", "14:30"];
-  const row5 = ["15:00", "15:30", "16:00", "16:30"];
-  const row6 = ["17:00", "17:30", "18:00", "18:30"];
-  const row7 = ["19:00", "19:30", "20:00", "20:30"];
-  const row8 = ["21:00", "21:30", "22:00", "22:30"];
+  const [bookingPopUpVisible, setBookingPopUpVisible] = useState(false);
+  const [createPopUpVisible, setCreatePopUpVisible] = useState(false);
 
   const hoursQueryRef = hoursRef
     .where("Year", "==", date.getFullYear().toString())
     .where("Month", "==", months[date.getMonth()].toString())
     .where("Day", "==", date.getDate().toString());
-  const userQueryRef = hoursRef.where(
-    "UserId",
-    "==",
-    firebase.auth().currentUser.uid
-  );
 
   const BookingPopUp = () => {
     const chosenUserRef = usersRef.where("UserId", "==", chosenUserId);
+    const [chosenUserName, setChosenUserName] = useState(null);
+    const [chosenUserMobile, setChosenUserMobile] = useState();
+
     chosenUserRef.onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
-        const { Name } = doc.data();
+        const { Name, Mobile } = doc.data();
         user.push({
           Name,
+          Mobile,
         });
         user.map((item) => {
           setChosenUserName(item.Name);
+          setChosenUserMobile(item.Mobile);
         });
         if (chosenUserName != null) {
           setUserLoading(false);
@@ -98,7 +83,8 @@ export const Calendar = () => {
             <View style={styles.popUpText}>
               <View style={styles.popUpTextfield}>
                 <Text style={styles.text}>Booket af: </Text>
-                <Text style={styles.text}>{chosenUserName}</Text>
+                <Text style={styles.text}>{chosenUserName},</Text>
+                <Text style={styles.text}>{chosenUserMobile}</Text>
               </View>
               <View style={styles.popUpTextfield}>
                 <Text style={styles.text}>Øver i tidsrummet: </Text>
@@ -112,7 +98,7 @@ export const Calendar = () => {
           <TouchableOpacity
             style={styles.popUpButton}
             onPress={() => {
-              setPopUpVisible(false);
+              setBookingPopUpVisible(false);
               setChosenUserName(null);
               setUserLoading(true);
             }}
@@ -156,40 +142,121 @@ export const Calendar = () => {
     });
   }
 
-  function createBooking(startHour) {
-    var selectedHours = [startHour];
-    firebase.firestore().collection("Øvelokale 3").add({
-      UserId: firebase.auth().currentUser.uid,
-      BookedHours: selectedHours,
-      Year: date.getFullYear().toString(),
-      Month: months[date.getMonth()].toString(),
-      Day: date.getDate().toString(),
-    });
-    setLoading(false);
-  }
+  const CreateBooking = () => {
+    const [chosen, setChosen] = useState();
+    const [selectedHours, setSelectedHours] = useState();
+    var possibleHours = [];
+    var filteredBookedHours = bookedHours.filter((item) => startHour < item);
+
+    console.log(filteredBookedHours);
+
+    for (let i = 0; i < availHours.length; i++) {
+      if (filteredBookedHours.length == 0 && availHours[i] > startHour) {
+        possibleHours.push(availHours[i]);
+      } else if (
+        availHours[i] > startHour &&
+        availHours[i] < filteredBookedHours[0]
+      ) {
+        possibleHours.push(availHours[i]);
+      }
+    }
+    for (let i = 0; i < filteredBookedHours.length; i++) {
+      if (startHour < filteredBookedHours[i]) {
+        possibleHours.push(filteredBookedHours[i]);
+        break;
+      }
+    }
+    if (possibleHours[possibleHours.length - 1] == "22:30") {
+      possibleHours.push("23:00");
+    }
+
+    function addHours() {
+      firebase
+        .firestore()
+        .collection(currentUserRoom)
+        .add({
+          UserId: firebase.auth().currentUser.uid,
+          BookedHours: selectedHours,
+          Year: date.getFullYear().toString(),
+          Month: months[date.getMonth()].toString(),
+          Day: date.getDate().toString(),
+        })
+        .then(() => setLoading(false));
+    }
+
+    return (
+      <View style={styles.popUpScreen}>
+        <View style={styles.popUp}>
+          <View style={styles.createPopUpText}>
+            <Text style={styles.text}>Øver fra {startHour} til:</Text>
+          </View>
+          <View style={styles.wheelPicker}>
+            <ScrollView>
+              {possibleHours.map((item, index) => {
+                return (
+                  <TouchableOpacity
+                    style={[
+                      chosen == index
+                        ? styles.chosenWheelOption
+                        : styles.wheelOption,
+                    ]}
+                    key={index}
+                    onPress={() => setChosen(index)}
+                  >
+                    <Text
+                      style={[
+                        chosen == index
+                          ? styles.chosenWheelOptionText
+                          : styles.wheelOptionText,
+                      ]}
+                    >
+                      {item}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+          <TouchableOpacity
+            style={styles.popUpButton}
+            onPress={() => {
+              setCreatePopUpVisible(false);
+            }}
+          >
+            <Text style={styles.buttonText}>Luk</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
 
   const RenderHour = (props) => {
     var checkedHours = [];
     for (let i = 0; i < props.rowNum.length; i++) {
       if (hours.some((row) => row.BookedHours.includes(props.rowNum[i]))) {
+        bookedHours.push(props.rowNum[i]);
         checkedHours.push(
           <TouchableOpacity
             style={styles.hourBooked}
             key={i}
             onPress={() => {
               getUserId(props.rowNum[i].toString());
-              setPopUpVisible(true);
+              setBookingPopUpVisible(true);
             }}
           >
             <Text style={styles.hourBookedText}>{props.rowNum[i]}</Text>
           </TouchableOpacity>
         );
       } else {
+        availHours.push(props.rowNum[i]);
         checkedHours.push(
           <TouchableOpacity
             style={styles.hourAvail}
             key={i}
-            onPress={() => createBooking(props.rowNum[i].toString())}
+            onPress={() => {
+              setStartHour(props.rowNum[i]);
+              setCreatePopUpVisible(true);
+            }}
           >
             <Text style={styles.hourAvailText}>{props.rowNum[i]}</Text>
           </TouchableOpacity>
@@ -202,16 +269,17 @@ export const Calendar = () => {
   useEffect(() => {
     hoursQueryRef.onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
-        const { UserId, BookedHours } = doc.data();
+        const { BookedHours } = doc.data();
         hours.push({
-          UserId,
           BookedHours,
         });
+      });
+      hours.map((item) => {
+        item.BookedHours.pop(item.BookedHours.length);
       });
       if (hours != []) {
         setLoading(false);
       }
-      console.log(hours);
     });
     setToggleUpdate(false);
   }, [toggleUpdate]);
@@ -234,7 +302,7 @@ export const Calendar = () => {
       </View>
       <View style={styles.header}>
         <View style={styles.line} />
-        <Text style={styles.text}>Vælg start for øver</Text>
+        <Text style={styles.text}>Vælg starttid for øver</Text>
         <View style={styles.line} />
       </View>
       {loading ? (
@@ -267,7 +335,8 @@ export const Calendar = () => {
           </View>
         </View>
       )}
-      {popUpVisible == true && <BookingPopUp />}
+      {bookingPopUpVisible == true && <BookingPopUp />}
+      {createPopUpVisible == true && <CreateBooking />}
     </View>
   );
 };
@@ -365,7 +434,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   popUp: {
-    height: 200,
+    height: 210,
     width: 300,
     borderRadius: 7,
     borderColor: "rgb(170,170,170)",
@@ -381,15 +450,15 @@ const styles = StyleSheet.create({
   },
   popUpText: {
     justifyContent: "space-between",
-    flex: 0.47,
+    flex: 0.6,
   },
   popUpTextfield: {
-    justifyContent: "space-between",
-    flex: 0.4,
+    justifyContent: "center",
+    flex: 0.5,
   },
   popUpButton: {
     flex: 0.2,
-    width: 100,
+    width: 120,
     backgroundColor: "rgb(187, 36, 25)",
     borderRadius: 7,
     alignItems: "center",
@@ -401,6 +470,48 @@ const styles = StyleSheet.create({
   buttonText: {
     fontWeight: "700",
     fontSize: 17,
+    color: "white",
+  },
+
+  createPopUpText: {
+    justifyContent: "center",
+    flex: 0.11,
+  },
+  wheelPicker: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 0.44,
+    width: "70%",
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: 7,
+    borderColor: "black",
+    borderWidth: 1,
+  },
+  wheelOption: {
+    borderRadius: 7,
+    padding: 4,
+    marginVertical: 4,
+    alignSelf: "center",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    width: "50%",
+    alignItems: "center",
+  },
+  chosenWheelOption: {
+    borderRadius: 7,
+    padding: 4,
+    marginVertical: 4,
+    alignSelf: "center",
+    backgroundColor: "rgb(187, 36, 25)",
+    width: "50%",
+    alignItems: "center",
+  },
+  wheelOptionText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  chosenWheelOptionText: {
+    fontSize: 16,
+    fontWeight: "600",
     color: "white",
   },
 });

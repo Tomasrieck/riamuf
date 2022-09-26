@@ -5,12 +5,12 @@ import React from "react";
 import { Header1 } from "../components/headers";
 import { EditUser } from "../components/firebase/editUser";
 
-export default function ProfileScreen() {
+export default function ProfileScreen(props) {
   return (
     <SafeAreaView style={styles.container}>
       <Header1 />
       <View style={styles.content}>
-        <EditUser />
+        <EditUser {...props} />
       </View>
       <StatusBar style="auto" />
     </SafeAreaView>

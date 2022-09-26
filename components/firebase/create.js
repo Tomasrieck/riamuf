@@ -32,13 +32,17 @@ export const Create = (props) => {
       .auth()
       .createUserWithEmailAndPassword(email, password)
       .then(() => {
-        firebase.firestore().collection("Users").add({
-          UserId: firebase.auth().currentUser.uid,
-          Name: name,
-          Mobile: mobile,
-          Email: email,
-          Room: room,
-        });
+        firebase
+          .firestore()
+          .collection("Users")
+          .doc(firebase.auth().currentUser.uid)
+          .set({
+            UserId: firebase.auth().currentUser.uid,
+            Name: name,
+            Mobile: mobile,
+            Email: email,
+            Room: room,
+          });
         setLoading(false);
         props.navigation.navigate("Home");
       })
@@ -115,12 +119,16 @@ export const Create = (props) => {
           onChangeText={setName}
           value={name}
           placeholder="Fulde navn..."
+          autoCorrect={false}
+          maxLength={25}
         />
         <TextInput
           style={styles.input}
           onChangeText={setMobile}
           value={mobile}
           placeholder="Mobil..."
+          autoCorrect={false}
+          maxLength={8}
         />
         <SelectDropdown
           renderDropdownIcon={() => (
@@ -135,7 +143,7 @@ export const Create = (props) => {
             borderWidth: 1,
             borderRadius: 7,
           }}
-          buttonTextStyle={{ textAlign: "left" }}
+          buttonTextStyle={{ textAlign: "left", fontWeight: "600" }}
           dropdownStyle={{ backgroundColor: "white", borderRadius: 7 }}
           data={rooms}
           defaultButtonText="Vælg øvelokale"
@@ -154,6 +162,7 @@ export const Create = (props) => {
           onChangeText={setEmail}
           value={email}
           placeholder="Email..."
+          autoCorrect={false}
         />
         <TextInput
           style={styles.input}
@@ -162,6 +171,7 @@ export const Create = (props) => {
           placeholder="Password..."
           autoCapitalize="none"
           secureTextEntry={true}
+          autoCorrect={false}
         />
         <TextInput
           style={styles.input}
@@ -170,6 +180,7 @@ export const Create = (props) => {
           placeholder="Gentag password..."
           autoCapitalize="none"
           secureTextEntry={true}
+          autoCorrect={false}
         />
         <TextInput
           style={styles.input}
@@ -178,6 +189,7 @@ export const Create = (props) => {
           placeholder="Hemmelig kode..."
           autoCapitalize="none"
           secureTextEntry={true}
+          autoCorrect={false}
         />
       </View>
 
@@ -197,6 +209,12 @@ export const Create = (props) => {
             <Text style={styles.createButtonText}>Opret Bruger</Text>
           </TouchableOpacity>
         )}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => props.navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>Tilbage</Text>
+        </TouchableOpacity>
       </View>
       {takenPopUpVisible == true && <EmailTakenPopUp />}
       {invalidPopUpVisible == true && <InvalidEmailPopUp />}
@@ -213,10 +231,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
   },
 
+  backButton: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  backButtonText: {
+    color: "rgb(187, 36, 25)",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+
   inputContainer: {
     flex: 0.666,
     flexDirection: "column",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     width: "75%",
   },
   input: {
@@ -229,7 +258,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   buttonField: {
-    flex: 0.1,
+    flex: 0.15,
     width: "75%",
     flexDirection: "column",
     justifyContent: "space-between",
