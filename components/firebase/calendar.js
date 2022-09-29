@@ -70,6 +70,31 @@ export const Calendar = () => {
       });
     });
 
+    function deleteHours() {
+      firebase
+        .firestore()
+        .collection(currentUserRoom)
+        .where("UserId", "==", chosenUserId)
+        .where("BookedHours", "==", chosenBookedHours)
+        .get()
+        .then((snapshot) => {
+          snapshot.forEach((doc) => {
+            firebase
+              .firestore()
+              .collection(currentUserRoom)
+              .doc(doc.id)
+              .delete()
+              .then(() => {
+                setHours([]);
+                setLoading(true);
+                setToggleUpdate(true);
+                setBookingPopUpVisible(false);
+                console.log("Øver slettet");
+              });
+          });
+        });
+    }
+
     return (
       <View style={styles.popUpScreen}>
         <View style={styles.popUp}>
@@ -84,7 +109,7 @@ export const Calendar = () => {
               <View style={styles.popUpTextfield}>
                 <Text style={styles.text}>Booket af: </Text>
                 <Text style={styles.text}>{chosenUserName},</Text>
-                <Text style={styles.text}>{chosenUserMobile}</Text>
+                <Text style={styles.text}>tlf.{chosenUserMobile}</Text>
               </View>
               <View style={styles.popUpTextfield}>
                 <Text style={styles.text}>Øver i tidsrummet: </Text>
@@ -95,16 +120,38 @@ export const Calendar = () => {
               </View>
             </View>
           )}
-          <TouchableOpacity
-            style={styles.popUpButton}
-            onPress={() => {
-              setBookingPopUpVisible(false);
-              setChosenUserName(null);
-              setUserLoading(true);
-            }}
-          >
-            <Text style={styles.buttonText}>Luk</Text>
-          </TouchableOpacity>
+          {chosenUserId == firebase.auth().currentUser.uid ? (
+            <View style={styles.deletePopUpButtonField}>
+              <TouchableOpacity
+                style={styles.createPopUpButtonClose}
+                onPress={() => {
+                  setBookingPopUpVisible(false);
+                  setChosenUserName(null);
+                  setUserLoading(true);
+                }}
+              >
+                <Text style={styles.buttonText2}>Luk</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.createPopUpButtonAdd}
+                onPress={deleteHours}
+              >
+                <Text style={styles.buttonText}>Slet</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.popUpButton}
+              onPress={() => {
+                setBookingPopUpVisible(false);
+                setChosenUserName(null);
+                setUserLoading(true);
+              }}
+            >
+              <Text style={styles.buttonText}>Luk</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     );
@@ -143,18 +190,16 @@ export const Calendar = () => {
   }
 
   const CreateBooking = () => {
-    const [chosen, setChosen] = useState();
-    const [selectedHours, setSelectedHours] = useState();
+    const [chosen, setChosen] = useState(null);
+    const selectedHours = [];
     var possibleHours = [];
     var filteredBookedHours = bookedHours.filter((item) => startHour < item);
 
-    console.log(filteredBookedHours);
-
     for (let i = 0; i < availHours.length; i++) {
-      if (filteredBookedHours.length == 0 && availHours[i] > startHour) {
+      if (filteredBookedHours.length == 0 && availHours[i] >= startHour) {
         possibleHours.push(availHours[i]);
       } else if (
-        availHours[i] > startHour &&
+        availHours[i] >= startHour &&
         availHours[i] < filteredBookedHours[0]
       ) {
         possibleHours.push(availHours[i]);
@@ -181,12 +226,28 @@ export const Calendar = () => {
           Month: months[date.getMonth()].toString(),
           Day: date.getDate().toString(),
         })
-        .then(() => setLoading(false));
+        .then(() => {
+          setHours([]);
+          setLoading(true);
+          setToggleUpdate(true);
+          setCreatePopUpVisible(false);
+        });
     }
+
+    useEffect(() => {
+      if (chosen != null) {
+        let i = 0;
+        while (possibleHours[i] <= possibleHours[chosen]) {
+          selectedHours.push(possibleHours[i]);
+          i++;
+        }
+        console.log(selectedHours);
+      }
+    }, [chosen]);
 
     return (
       <View style={styles.popUpScreen}>
-        <View style={styles.popUp}>
+        <View style={styles.createPopUp}>
           <View style={styles.createPopUpText}>
             <Text style={styles.text}>Øver fra {startHour} til:</Text>
           </View>
@@ -217,14 +278,23 @@ export const Calendar = () => {
               })}
             </ScrollView>
           </View>
-          <TouchableOpacity
-            style={styles.popUpButton}
-            onPress={() => {
-              setCreatePopUpVisible(false);
-            }}
-          >
-            <Text style={styles.buttonText}>Luk</Text>
-          </TouchableOpacity>
+          <View style={styles.popUpButtonField}>
+            <TouchableOpacity
+              style={styles.createPopUpButtonClose}
+              onPress={() => {
+                setCreatePopUpVisible(false);
+              }}
+            >
+              <Text style={styles.buttonText2}>Luk</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.createPopUpButtonAdd}
+              onPress={addHours}
+            >
+              <Text style={styles.buttonText}>Book</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
@@ -287,9 +357,13 @@ export const Calendar = () => {
   return (
     <View style={styles.container}>
       <View style={styles.datePicker}>
-        <TouchableOpacity onPress={yesterday}>
-          <AntDesign name="left" size={27} color="rgb(187, 36, 25)" />
-        </TouchableOpacity>
+        {date.getDate() == new Date().getDate() ? (
+          <View style={{ flex: 0.3333 }} />
+        ) : (
+          <TouchableOpacity onPress={yesterday}>
+            <AntDesign name="left" size={27} color="rgb(187, 36, 25)" />
+          </TouchableOpacity>
+        )}
         <View style={styles.date}>
           <Text style={styles.text}>{days[date.getDay()]} </Text>
           <Text style={styles.text}>{date.getDate()}. </Text>
@@ -473,14 +547,29 @@ const styles = StyleSheet.create({
     color: "white",
   },
 
+  createPopUp: {
+    height: 320,
+    width: 300,
+    borderRadius: 7,
+    borderColor: "rgb(170,170,170)",
+    borderWidth: 1,
+    backgroundColor: "whitesmoke",
+    shadowColor: "rgb(0,0,0)",
+    shadowOffset: { width: 2, height: 3 },
+    shadowOpacity: 0.87,
+    shadowRadius: 11,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "space-evenly",
+  },
   createPopUpText: {
-    justifyContent: "center",
-    flex: 0.11,
+    justifyContent: "flex-end",
+    flex: 0.07,
   },
   wheelPicker: {
     flexDirection: "row",
     alignItems: "center",
-    flex: 0.44,
+    flex: 0.6,
     width: "70%",
     backgroundColor: "rgba(0,0,0,0.4)",
     borderRadius: 7,
@@ -513,5 +602,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "white",
+  },
+  popUpButtonField: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "97%",
+    flex: 0.12,
+  },
+  createPopUpButtonClose: {
+    flex: 0.3,
+    width: 120,
+    backgroundColor: "white",
+    borderColor: "rgb(187, 36, 25)",
+    borderWidth: 2,
+    borderRadius: 7,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  createPopUpButtonAdd: {
+    flex: 0.3,
+    width: 120,
+    backgroundColor: "rgb(187, 36, 25)",
+    borderRadius: 7,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText2: {
+    fontWeight: "700",
+    fontSize: 17,
+    color: "rgb(187, 36, 25)",
+  },
+  deletePopUpButtonField: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    width: "87%",
+    flex: 0.17,
   },
 });

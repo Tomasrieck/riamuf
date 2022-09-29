@@ -42,9 +42,11 @@ export const Create = (props) => {
             Mobile: mobile,
             Email: email,
             Room: room,
+          })
+          .then(() => {
+            setLoading(false);
+            props.navigation.navigate("Home");
           });
-        setLoading(false);
-        props.navigation.navigate("Home");
       })
       .catch((error) => {
         if (error.code === "auth/email-already-in-use") {
