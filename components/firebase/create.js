@@ -23,8 +23,6 @@ export const Create = (props) => {
   const [secretKey, setSecretKey] = useState(null);
   const rooms = ["Øvelokale 1", "Øvelokale 2", "Øvelokale 3"];
   const [loading, setLoading] = useState(false);
-  const [takenPopUpVisible, setTakenPopUpVisible] = useState(false);
-  const [invalidPopUpVisible, setInvalidPopUpVisible] = useState(false);
   const [buttonCheck, setButtonCheck] = useState(true);
 
   function createUser() {
@@ -63,44 +61,6 @@ export const Create = (props) => {
         }
       });
   }
-
-  const EmailTakenPopUp = () => {
-    return (
-      <View style={styles.popUpScreen}>
-        <View style={styles.popUp}>
-          <View style={styles.popUpText}>
-            <Text style={styles.text}>Denne mail er allerede i brug.</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.popUpButton}
-            onPress={() => setTakenPopUpVisible(false)}
-          >
-            <Text style={styles.buttonText}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
-
-  const InvalidEmailPopUp = () => {
-    return (
-      <View style={styles.popUpScreen}>
-        <View style={styles.popUp}>
-          <View style={styles.popUpText}>
-            <Text style={styles.text}>
-              Denne mail er ugylig. Prøv en anden.
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={styles.popUpButton}
-            onPress={() => setInvalidPopUpVisible(false)}
-          >
-            <Text style={styles.buttonText}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
 
   useEffect(() => {
     if (
@@ -221,8 +181,6 @@ export const Create = (props) => {
           <Text style={styles.backButtonText}>Tilbage</Text>
         </TouchableOpacity>
       </View>
-      {takenPopUpVisible == true && <EmailTakenPopUp />}
-      {invalidPopUpVisible == true && <InvalidEmailPopUp />}
     </View>
   );
 };

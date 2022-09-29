@@ -6,16 +6,14 @@ import {
   TextInput,
   Alert,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { firebase } from "./config";
-
-import { AntDesign } from "@expo/vector-icons";
 
 export var userRoom = "";
 
 export const Login = (props) => {
-  const [email, setEmail] = useState(null);
-  const [password, setPassword] = useState(null);
+  const [email, setEmail] = useState("tomasrieck@gmail.com");
+  const [password, setPassword] = useState("Jesorm99");
 
   function logIn() {
     firebase
