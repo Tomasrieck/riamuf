@@ -317,6 +317,26 @@ export const Calendar = () => {
             <Text style={styles.hourBookedText}>{props.rowNum[i]}</Text>
           </TouchableOpacity>
         );
+      } else if (
+        hours.some(
+          (row) =>
+            row.BookedHours.includes(props.rowNum[i]) &&
+            row.UserId == firebase.auth().currentUser.uid
+        )
+      ) {
+        bookedHours.push(props.rowNum[i]);
+        checkedHours.push(
+          <TouchableOpacity
+            style={styles.myHourBooked}
+            key={i}
+            onPress={() => {
+              getUserId(props.rowNum[i].toString());
+              setBookingPopUpVisible(true);
+            }}
+          >
+            <Text style={styles.hourBookedText}>{props.rowNum[i]}</Text>
+          </TouchableOpacity>
+        );
       } else {
         availHours.push(props.rowNum[i]);
         checkedHours.push(
@@ -339,9 +359,10 @@ export const Calendar = () => {
   useEffect(() => {
     hoursQueryRef.onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
-        const { BookedHours } = doc.data();
+        const { BookedHours, UserId } = doc.data();
         hours.push({
           BookedHours,
+          UserId,
         });
       });
       hours.map((item) => {
@@ -485,6 +506,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
     borderColor: "lightgray",
+    borderWidth: 2.4,
+    borderRadius: 50,
+  },
+  myHourBooked: {
+    flex: 0.22,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderColor: "red",
     borderWidth: 2.4,
     borderRadius: 50,
   },

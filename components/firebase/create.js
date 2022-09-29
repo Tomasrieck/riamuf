@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import SelectDropdown from "react-native-select-dropdown";
@@ -50,14 +51,16 @@ export const Create = (props) => {
       })
       .catch((error) => {
         if (error.code === "auth/email-already-in-use") {
-          console.log("That email address is already in use!");
+          Alert.alert("Fejl", "Email er allerede i brug.", [{ text: "OK" }]);
+          console.log("Email er allerede i brug.");
         }
 
         if (error.code === "auth/invalid-email") {
-          console.log("That email address is invalid!");
+          Alert.alert("Fejl", "Email er ikke tastet korrekt.", [
+            { text: "OK" },
+          ]);
+          console.log("Email er ikke tastet korrekt.");
         }
-
-        console.error(error);
       });
   }
 

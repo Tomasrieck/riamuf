@@ -4,7 +4,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  TextInputComponent,
+  Alert,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { firebase } from "./config";
@@ -36,9 +36,17 @@ export const Login = (props) => {
       })
       .catch((error) => {
         if (error.code === "auth/invalid-email") {
-          console.log("That email address is invalid!");
+          Alert.alert("Fejl", "Email er ikke tastet korrekt.", [
+            { text: "OK" },
+          ]);
+          console.log("Email er ikke tastet korrekt.");
         }
-        console.error(error);
+        if (error.code === "auth/user-not-found") {
+          Alert.alert("Fejl", "Forkert email eller password.", [
+            { text: "OK" },
+          ]);
+          console.log("Email er allerede i brug.");
+        }
       });
   }
 
