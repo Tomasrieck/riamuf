@@ -196,10 +196,10 @@ export const Calendar = () => {
     var filteredBookedHours = bookedHours.filter((item) => startHour < item);
 
     for (let i = 0; i < availHours.length; i++) {
-      if (filteredBookedHours.length == 0 && availHours[i] >= startHour) {
+      if (filteredBookedHours.length == 0 && availHours[i] > startHour) {
         possibleHours.push(availHours[i]);
       } else if (
-        availHours[i] >= startHour &&
+        availHours[i] > startHour &&
         availHours[i] < filteredBookedHours[0]
       ) {
         possibleHours.push(availHours[i]);
@@ -212,6 +212,9 @@ export const Calendar = () => {
       }
     }
     if (possibleHours[possibleHours.length - 1] == "22:30") {
+      possibleHours.push("23:00");
+    }
+    if (startHour == "22:30") {
       possibleHours.push("23:00");
     }
 
@@ -303,7 +306,13 @@ export const Calendar = () => {
   const RenderHour = (props) => {
     var checkedHours = [];
     for (let i = 0; i < props.rowNum.length; i++) {
-      if (hours.some((row) => row.BookedHours.includes(props.rowNum[i]))) {
+      if (
+        hours.some(
+          (row) =>
+            row.BookedHours.includes(props.rowNum[i]) &&
+            row.UserId != firebase.auth().currentUser.uid
+        )
+      ) {
         bookedHours.push(props.rowNum[i]);
         checkedHours.push(
           <TouchableOpacity
@@ -315,6 +324,26 @@ export const Calendar = () => {
             }}
           >
             <Text style={styles.hourBookedText}>{props.rowNum[i]}</Text>
+          </TouchableOpacity>
+        );
+      } else if (
+        hours.some(
+          (row) =>
+            row.BookedHours.includes(props.rowNum[i]) &&
+            row.UserId == firebase.auth().currentUser.uid
+        )
+      ) {
+        bookedHours.push(props.rowNum[i]);
+        checkedHours.push(
+          <TouchableOpacity
+            style={styles.myHourBooked}
+            key={i}
+            onPress={() => {
+              getUserId(props.rowNum[i].toString());
+              setBookingPopUpVisible(true);
+            }}
+          >
+            <Text style={styles.myHourBookedText}>{props.rowNum[i]}</Text>
           </TouchableOpacity>
         );
       } else {
@@ -489,12 +518,26 @@ const styles = StyleSheet.create({
     borderWidth: 2.4,
     borderRadius: 50,
   },
+  myHourBooked: {
+    flex: 0.22,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderColor: "deepskyblue",
+    borderWidth: 2.4,
+    borderRadius: 50,
+  },
   hourAvailText: {
     color: "limegreen",
     fontWeight: "700",
   },
   hourBookedText: {
     color: "lightgray",
+    fontWeight: "700",
+  },
+  myHourBookedText: {
+    color: "deepskyblue",
     fontWeight: "700",
   },
   loader: {
