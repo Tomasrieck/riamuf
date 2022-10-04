@@ -109,7 +109,7 @@ export const Calendar = () => {
               <View style={styles.popUpTextfield}>
                 <Text style={styles.text}>Booket af: </Text>
                 <Text style={styles.text}>{chosenUserName},</Text>
-                <Text style={styles.text}>tlf.{chosenUserMobile}</Text>
+                <Text style={styles.text}>Tlf. {chosenUserMobile}</Text>
               </View>
               <View style={styles.popUpTextfield}>
                 <Text style={styles.text}>Øver i tidsrummet: </Text>
@@ -388,7 +388,7 @@ export const Calendar = () => {
     <View style={styles.container}>
       <View style={styles.datePicker}>
         {date.getDate() == new Date().getDate() ? (
-          <View style={{ flex: 0.3333 }} />
+          <View style={{ flex: 0.25 }} />
         ) : (
           <TouchableOpacity onPress={yesterday}>
             <AntDesign name="left" size={27} color="rgb(187, 36, 25)" />

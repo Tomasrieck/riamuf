@@ -6,6 +6,7 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  TouchableWithoutFeedback,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import SelectDropdown from "react-native-select-dropdown";
@@ -89,6 +90,7 @@ export const Create = (props) => {
         />
         <TextInput
           style={styles.input}
+          keyboardType="numeric"
           onChangeText={setMobile}
           value={mobile}
           placeholder="Mobil..."
