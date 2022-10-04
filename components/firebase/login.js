@@ -12,8 +12,8 @@ import { firebase } from "./config";
 export var userRoom = "";
 
 export const Login = (props) => {
-  const [email, setEmail] = useState("tomasrieck@gmail.com");
-  const [password, setPassword] = useState("Jesorm99");
+  const [email, setEmail] = useState(null);
+  const [password, setPassword] = useState(null);
 
   function logIn() {
     firebase

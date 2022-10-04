@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
+  Alert,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { firebase } from "./config";
@@ -89,6 +90,9 @@ export const Calendar = () => {
                 setLoading(true);
                 setToggleUpdate(true);
                 setBookingPopUpVisible(false);
+                /*
+                Alert.alert("Succes", "Øveren er slettet!", [{ text: "OK" }]);
+                */
                 console.log("Øver slettet");
               });
           });
@@ -193,20 +197,20 @@ export const Calendar = () => {
     const [chosen, setChosen] = useState(null);
     const selectedHours = [];
     var possibleHours = [];
-    var filteredBookedHours = bookedHours.filter((item) => startHour < item);
+    var filteredBookedHours = bookedHours.filter((item) => startHour <= item);
 
     for (let i = 0; i < availHours.length; i++) {
-      if (filteredBookedHours.length == 0 && availHours[i] > startHour) {
+      if (filteredBookedHours.length == 0 && availHours[i] >= startHour) {
         possibleHours.push(availHours[i]);
       } else if (
-        availHours[i] > startHour &&
+        availHours[i] >= startHour &&
         availHours[i] < filteredBookedHours[0]
       ) {
         possibleHours.push(availHours[i]);
       }
     }
     for (let i = 0; i < filteredBookedHours.length; i++) {
-      if (startHour < filteredBookedHours[i]) {
+      if (startHour <= filteredBookedHours[i]) {
         possibleHours.push(filteredBookedHours[i]);
         break;
       }
@@ -234,6 +238,10 @@ export const Calendar = () => {
           setLoading(true);
           setToggleUpdate(true);
           setCreatePopUpVisible(false);
+          /*
+          Alert.alert("Succes", "Øveren er booket!", [{ text: "OK" }]);
+          */
+          console.log("Øver booked");
         });
     }
 
@@ -256,7 +264,7 @@ export const Calendar = () => {
           </View>
           <View style={styles.wheelPicker}>
             <ScrollView>
-              {possibleHours.map((item, index) => {
+              {possibleHours.slice(1).map((item, index) => {
                 return (
                   <TouchableOpacity
                     style={[
@@ -499,45 +507,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   hourAvail: {
-    flex: 0.22,
-    height: 32,
+    flex: 0.23,
+    height: 33,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
-    borderColor: "limegreen",
-    borderWidth: 2.4,
+    backgroundColor: "deepskyblue",
     borderRadius: 50,
   },
   hourBooked: {
-    flex: 0.22,
-    height: 32,
+    flex: 0.23,
+    height: 33,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
-    borderColor: "lightgray",
-    borderWidth: 2.4,
+    backgroundColor: "lightgray",
     borderRadius: 50,
   },
   myHourBooked: {
-    flex: 0.22,
-    height: 32,
+    flex: 0.23,
+    height: 33,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
-    borderColor: "deepskyblue",
-    borderWidth: 2.4,
+    backgroundColor: "limegreen",
     borderRadius: 50,
   },
   hourAvailText: {
-    color: "limegreen",
+    color: "white",
     fontWeight: "700",
   },
   hourBookedText: {
-    color: "lightgray",
+    color: "white",
     fontWeight: "700",
   },
   myHourBookedText: {
-    color: "deepskyblue",
+    color: "white",
     fontWeight: "700",
   },
   loader: {
@@ -615,7 +617,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 0.6,
     width: "70%",
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 7,
     borderColor: "black",
     borderWidth: 1,

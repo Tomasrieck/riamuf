@@ -6,8 +6,8 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
-  TouchableWithoutFeedback,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import React, { useState, useEffect } from "react";
 import SelectDropdown from "react-native-select-dropdown";
 import { firebase } from "./config";
@@ -78,7 +78,12 @@ export const Create = (props) => {
   });
 
   return (
-    <View style={styles.container}>
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.container}
+      style={styles.containerScroll}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -183,17 +188,19 @@ export const Create = (props) => {
           <Text style={styles.backButtonText}>Tilbage</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAwareScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: "100%",
-    backgroundColor: "white",
     alignItems: "center",
     justifyContent: "space-evenly",
+  },
+  containerScroll: {
+    width: "100%",
+    backgroundColor: "white",
   },
 
   backButton: {
