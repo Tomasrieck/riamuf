@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, SafeAreaView } from "react-native";
 
 import { Header1 } from "../components/headers";
@@ -8,6 +7,7 @@ import React from "react";
 export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar translucent={false} />
       <Header1 />
       <View style={styles.content}>
         <Calendar />

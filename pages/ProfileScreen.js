@@ -1,5 +1,4 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, SafeAreaView, FlatList } from "react-native";
+import { StyleSheet, View, SafeAreaView, StatusBar } from "react-native";
 import React from "react";
 
 import { Header1 } from "../components/headers";
@@ -8,6 +7,7 @@ import { EditUser } from "../components/firebase/editUser";
 export default function ProfileScreen(props) {
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar translucent={false} />
       <Header1 />
       <View style={styles.content}>
         <EditUser {...props} />

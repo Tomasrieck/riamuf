@@ -1,5 +1,4 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, SafeAreaView } from "react-native";
+import { StyleSheet, View, SafeAreaView, StatusBar } from "react-native";
 
 import { Header2 } from "../components/headers";
 import React from "react";
@@ -8,6 +7,7 @@ import { Create } from "../components/firebase/create";
 export default function CreateScreen(props) {
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar translucent={false} />
       <Header2 />
       <View style={styles.content}>
         <Create {...props} />
