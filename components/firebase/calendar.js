@@ -7,20 +7,10 @@ import {
   ScrollView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
+import GestureRecognizer from "react-native-swipe-gestures";
 import { firebase } from "./config";
 import { userRoom } from "./login";
-import {
-  days,
-  months,
-  row1,
-  row2,
-  row3,
-  row4,
-  row5,
-  row6,
-  row7,
-  row8,
-} from "../calendarUtils";
+import { days, months, clocks } from "../calendarUtils";
 
 import { AntDesign } from "@expo/vector-icons";
 
@@ -115,10 +105,16 @@ export const Calendar = () => {
                 <Text style={styles.text}>Tlf. {chosenUserMobile}</Text>
               </View>
               <View style={styles.popUpTextfield}>
-                <Text style={styles.text}>Øver i tidsrummet: </Text>
+                <Text style={styles.text}>Øver til og med: </Text>
                 <Text style={styles.text}>
                   {chosenBookedHours[0]} -{" "}
-                  {chosenBookedHours[chosenBookedHours.length - 1]}
+                  {
+                    clocks[
+                      clocks.indexOf(
+                        chosenBookedHours[chosenBookedHours.length - 1]
+                      ) + 1
+                    ]
+                  }
                 </Text>
               </View>
             </View>
@@ -160,6 +156,7 @@ export const Calendar = () => {
     );
   };
 
+  // Lav swipe-funktion
   function tomorrow() {
     setLoading(true);
     setHours([]);
@@ -381,9 +378,6 @@ export const Calendar = () => {
           UserId,
         });
       });
-      hours.map((item) => {
-        item.BookedHours.pop(item.BookedHours.length);
-      });
       if (hours != []) {
         setLoading(false);
       }
@@ -395,7 +389,7 @@ export const Calendar = () => {
     <View style={styles.container}>
       <View style={styles.datePicker}>
         {date.getDate() == new Date().getDate() ? (
-          <View style={{ flex: 0.25 }} />
+          <View style={{ flex: 0.33 }} />
         ) : (
           <TouchableOpacity onPress={yesterday}>
             <AntDesign name="left" size={27} color="rgb(187, 36, 25)" />
@@ -419,32 +413,40 @@ export const Calendar = () => {
       {loading ? (
         <ActivityIndicator size="large" color="gray" style={styles.loader} />
       ) : (
-        <View style={styles.schedule}>
+        <GestureRecognizer
+          style={styles.schedule}
+          onSwipeLeft={() => tomorrow()}
+          onSwipeRight={() => {
+            if (date.getDate() != new Date().getDate()) {
+              yesterday();
+            }
+          }}
+        >
           <View style={styles.row}>
-            <RenderHour rowNum={row1} />
+            <RenderHour rowNum={clocks.slice(0, 4)} />
           </View>
           <View style={styles.row}>
-            <RenderHour rowNum={row2} />
+            <RenderHour rowNum={clocks.slice(4, 8)} />
           </View>
           <View style={styles.row}>
-            <RenderHour rowNum={row3} />
+            <RenderHour rowNum={clocks.slice(8, 12)} />
           </View>
           <View style={styles.row}>
-            <RenderHour rowNum={row4} />
+            <RenderHour rowNum={clocks.slice(12, 16)} />
           </View>
           <View style={styles.row}>
-            <RenderHour rowNum={row5} />
+            <RenderHour rowNum={clocks.slice(16, 20)} />
           </View>
           <View style={styles.row}>
-            <RenderHour rowNum={row6} />
+            <RenderHour rowNum={clocks.slice(20, 24)} />
           </View>
           <View style={styles.row}>
-            <RenderHour rowNum={row7} />
+            <RenderHour rowNum={clocks.slice(24, 28)} />
           </View>
           <View style={styles.row}>
-            <RenderHour rowNum={row8} />
+            <RenderHour rowNum={clocks.slice(28, 32)} />
           </View>
-        </View>
+        </GestureRecognizer>
       )}
       {bookingPopUpVisible == true && <BookingPopUp />}
       {createPopUpVisible == true && <CreateBooking />}

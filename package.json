@@ -21,6 +21,7 @@
     "react-native-elements": "^3.4.2",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-select-dropdown": "^2.0.4",
+    "react-native-swipe-gestures": "^1.0.5",
     "rxfire": "^6.0.3",
     "rxjs": "^7.5.6"
   },

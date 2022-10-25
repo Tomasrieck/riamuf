@@ -135,6 +135,7 @@ export const Create = (props) => {
           value={email}
           placeholder="Email..."
           autoCorrect={false}
+          autoCapitalize="none"
         />
         <TextInput
           style={styles.input}
